@@ -8,6 +8,7 @@ import { getActivityUrl } from "utils/strava";
 import cardStyles from 'styles/Card.module.scss';
 import styles from './StravaCard.module.scss';
 import { StravaRideDetails } from "./details/StravaRideDetails";
+import { StravaActivityDetails } from "./details/StravaActivityDetails";
 
 export interface StravaCardProps {
     activity: StravaActivity;
@@ -35,7 +36,7 @@ const getActivityDetails = (activity: StravaActivity) => {
         case StravaActivityType.VIRTUAL_RIDE:
             return <StravaRideDetails activity={activity as StravaRideActivity} />;
         default:
-            return null;
+            return <StravaActivityDetails activity={activity} />;
     }
 }
 

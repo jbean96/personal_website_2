@@ -5,9 +5,11 @@ import Head from "next/head";
 import { StravaActivity } from "types/strava";
 import { getStravaActivities } from "utils/api";
 import { StravaCard } from "components/stravaCard/StravaCard";
+import { ActivitiesContextProvider } from "components/activities/ActivitiesContext";
 
 import commonStyles from 'styles/common.module.scss';
 import styles from './Activities.module.css';
+import { ActivitiesMeasurementToggle } from "components/activities/ActivitiesMeasurementToggle";
 
 const Activities: NextPage = () => {
     const [activities, setActivities] = useState<StravaActivity[]>([]);
@@ -61,14 +63,19 @@ const Activities: NextPage = () => {
                     swim (sometimes), hike and ski. 
                 </div>
             </div>
-            {/* TODO: Add breakpoints from month/year? */}
-            {activities.map((activity, index) => {
-                if (index === activities.length - 1) {
-                    return <StravaCard ref={lastActivityRef} key={activity.id} activity={activity} />;
-                } else {
-                    return <StravaCard key={activity.id} activity={activity} />
-                }
-            })}
+            <ActivitiesContextProvider>
+                <div className={styles.controls}>
+                    <ActivitiesMeasurementToggle />
+                </div>
+                {/* TODO: Add breakpoints from month/year? */}
+                {activities.map((activity, index) => {
+                    if (index === activities.length - 1) {
+                        return <StravaCard ref={lastActivityRef} key={activity.id} activity={activity} />;
+                    } else {
+                        return <StravaCard key={activity.id} activity={activity} />
+                    }
+                })}
+            </ActivitiesContextProvider>
         </div>
 
     )

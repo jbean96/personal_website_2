@@ -24,8 +24,10 @@
     align-items: baseline;
 
     .detail {
-        margin: 4px;
+        margin: 8px;
         display: flex;
+        min-width: 80px;
+        justify-content: flex-end;
 
         svg {
             font-size: 1em;
