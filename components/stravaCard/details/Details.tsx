@@ -1,11 +1,11 @@
 import { FC, useContext } from "react";
 import { Height, ModeCommentTwoTone, Timer } from "@mui/icons-material";
 import { StravaActivity } from "types/strava";
-
-import styles from 'components/stravaCard/StravaCard.module.scss';
-import { ActivitiesContext, ActivityFilter, MeasurementSystem } from "components/activities/ActivitiesContext";
 import NumberFormat from "react-number-format";
 import moment from "moment";
+
+import styles from 'components/stravaCard/StravaCard.module.scss';
+import { ActivitiesContext, MeasurementSystem } from "components/activities/ActivitiesContext";
 
 type Conversion = {
     label: string;
@@ -29,6 +29,9 @@ export namespace Details {
         [MeasurementSystem.METRIC]: { label: "m", fn: (meters => meters) },
     };
 
+    /**
+     * Detail for displaying the distance of an activity.
+     */
     interface DistanceProps {
         distance: StravaActivity['distance'];
     }
@@ -46,6 +49,9 @@ export namespace Details {
         );
     }
     
+    /**
+     * Detail for displaying the time of an activity.
+     */
     interface TimeProps {
         time: StravaActivity['moving_time'];
     }
@@ -62,6 +68,9 @@ export namespace Details {
         );
     }
 
+    /**
+     * Detail for displaying the elevation of an activity.
+     */
     interface ElevationProps {
         elevation: StravaActivity['total_elevation_gain'];
     }
@@ -80,6 +89,9 @@ export namespace Details {
         )
     }
 
+    /**
+     * Detail for displaying the pace of an activity.
+     */
     interface PaceProps {
         pace: StravaActivity['average_speed'];
     }

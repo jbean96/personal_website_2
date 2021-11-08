@@ -8,7 +8,7 @@ import { StravaCard } from "components/stravaCard/StravaCard";
 import { ActivitiesContextProvider } from "components/activities/ActivitiesContext";
 
 import commonStyles from 'styles/common.module.scss';
-import styles from './Activities.module.css';
+import styles from 'styles/about/Activities.module.css';
 import { ActivitiesMeasurementToggle } from "components/activities/ActivitiesMeasurementToggle";
 
 const Activities: NextPage = () => {
@@ -60,20 +60,23 @@ const Activities: NextPage = () => {
                 <div className={commonStyles.title}>Strava Activity</div>
                 <div className={commonStyles.description}>
                     I try to stay active, biking is my vice and where I spend the majority of my spare time/money. I also run,
-                    swim (sometimes), hike and ski. 
+                    hike, ski and am always excited to try new activities that get my blood flowing and my body engaged.
                 </div>
             </div>
             <ActivitiesContextProvider>
+                {/* TODO: Summary details? Total activities this month? Last month? */}
                 <div className={styles.controls}>
                     <ActivitiesMeasurementToggle />
                 </div>
                 {/* TODO: Add breakpoints from month/year? */}
                 {activities.map((activity, index) => {
-                    if (index === activities.length - 1) {
-                        return <StravaCard ref={lastActivityRef} key={activity.id} activity={activity} />;
-                    } else {
-                        return <StravaCard key={activity.id} activity={activity} />
-                    }
+                    return (
+                        <StravaCard 
+                            ref={index === activities.length - 1 ? lastActivityRef : undefined} 
+                            key={activity.id} 
+                            activity={activity} 
+                        />
+                    );
                 })}
             </ActivitiesContextProvider>
         </div>

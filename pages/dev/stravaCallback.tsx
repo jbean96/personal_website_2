@@ -1,4 +1,4 @@
-import styles from 'styles/Strava.module.css';
+import styles from 'styles/dev/Strava.module.css';
 
 import axios, { AxiosResponse } from "axios";
 import { GetServerSideProps, InferGetServerSidePropsType, NextPage } from "next";
