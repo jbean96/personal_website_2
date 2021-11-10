@@ -8,7 +8,7 @@ import { NavBar } from 'components/NavBar';
 const theme = createTheme({
   typography: {
      h1: {
-      fontSize: 60,
+      fontSize: 48,
       fontWeight: 500,
     },
     h2: {

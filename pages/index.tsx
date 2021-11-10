@@ -1,8 +1,9 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import React from 'react';
-import styles from 'styles/Home.module.css';
+import Head from "next/head";
 import Link from "next/link";
+import type { NextPage } from "next";
+import React from "react";
+
+import styles from "styles/Home.module.css";
 
 const Home: NextPage = () => {
   return (
@@ -15,7 +16,7 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Hey, I'm Josh!
+          Hey, I&#39;m Josh!
         </h1>
         <Link href="/blog">Blog</Link>
       </main>
