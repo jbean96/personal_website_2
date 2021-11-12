@@ -1,13 +1,24 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
-import React from 'react';
-import { Container, createTheme } from '@mui/material';
-import { ThemeProvider } from '@emotion/react';
-import { NavBar } from 'components/NavBar';
+import "../styles/globals.css"
+import type { AppProps } from "next/app"
+import React from "react";
+import { blueGrey, indigo } from "@mui/material/colors";
+import { Container, createTheme } from "@mui/material";
+import { ThemeProvider } from "@emotion/react";
+import { ThemeProvider as StyledComponentsThemeProvider } from "styled-components";
+
+import { NavBar } from "components/NavBar";
 
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: indigo[500],
+    },
+    secondary: {
+      main: blueGrey[300],
+    },
+  },
   typography: {
-     h1: {
+    h1: {
       fontSize: 48,
       fontWeight: 500,
     },
@@ -32,10 +43,12 @@ const theme = createTheme({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={theme}>
-      <NavBar />
-      <Container maxWidth="lg" disableGutters style={{ minWidth: "440px" }}>
-        <Component {...pageProps} />
-      </Container>
+      <StyledComponentsThemeProvider theme={theme}>
+        <NavBar />
+        <Container maxWidth="lg" disableGutters style={{ minWidth: "440px" }}>
+          <Component {...pageProps} />
+        </Container>
+      </StyledComponentsThemeProvider>
     </ThemeProvider>
   );
 }
