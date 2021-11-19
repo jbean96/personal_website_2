@@ -12,7 +12,7 @@ import { PostCard, PostData, validatePostMetadata } from "components/posts";
 
 // TODO: Make this getRenderedProps and fetch the lists of posts from elsewhere
 export const getStaticProps: GetStaticProps<{ posts: PostData[] }> = async () => {
-    const paths = glob.sync("posts/**/post.mdx");
+    const paths = glob.sync("posts/!(components)/post.mdx");
 
     const posts = paths
         .map(filePath => {
@@ -42,7 +42,7 @@ const Blog: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ posts 
     return (
         <Container maxWidth={"md"}>
             <PageTitle backButton>Blog</PageTitle>
-            <Stack>
+            <Stack spacing={3}>
                 {posts.map(post => <PostCard key={post.slug} post={post} />)}
             </Stack>
         </Container>

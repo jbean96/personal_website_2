@@ -19,27 +19,30 @@ const theme = createTheme({
   },
   typography: {
     allVariants: {
-      lineHeight: "1.5em",
-      letterSpacing: "0.05em"
+      lineHeight: "1.7em",
+      letterSpacing: "0.06em"
     },
     h1: {
-      fontSize: 48,
-      fontWeight: 500
+      fontSize: "3rem",
+      fontWeight: 700,
+      letterSpacing: "0.03em"
     },
     h2: {
-      fontSize: 36
+      fontSize: "2.2rem",
+      fontWeight: 700,
+      letterSpacing: "0.04em"
     },
     h3: {
-      fontSize: 28
+      fontSize: "1.8rem"
     },
     h4: {
-      fontSize: 24
+      fontSize: "1.6rem"
     },
     h5: {
-      fontSize: 22
+      fontSize: "1.3rem"
     },
     h6: {
-      fontSize: 20
+      fontSize: "1.2rem"
     }
   }
 });

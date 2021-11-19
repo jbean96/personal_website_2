@@ -5,4 +5,4 @@ export const validatePostMetadata = (metadata: { [key: string]: any }): metadata
         return false;
     }
     return true;
-}
+};
