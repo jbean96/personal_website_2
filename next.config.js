@@ -12,12 +12,11 @@ module.exports = {
         // The default `babel-loader` used by Next:
         options.defaultLoaders.babel,
         {
-          loader: "@mdx-js/loader",
-          options: {/* jsxImportSource: …, otherOptions… */}
+          loader: "@mdx-js/loader"
         }
       ]
-    })
+    });
 
-    return config
+    return config;
   }
-}
+};

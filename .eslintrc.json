@@ -8,6 +8,10 @@
   "rules": {
     "import/order": ["error", { "newlines-between": "always" }],
     "import/export": "off",
-    "quotes": "error"
+    "quotes": "error",
+    "semi": "error",
+    "max-len": ["error", { "code": 120 }],
+    "comma-dangle": "error",
+    "no-trailing-spaces": "error"
   }
 }
