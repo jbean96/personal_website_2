@@ -1,0 +1,323 @@
+---
+title: The `children` Prop Misnomer
+date: November 7, 2021
+description: Why the name of the "children" prop is misleading and how it complicates the concept of Parent/Child component relationships.
+tags: React
+---
+
+If you have been using React for awhile, you have most likely developed some understanding of the component lifecycle and rendering process. You may have made the observation before that components will re-render whenever their parent component re-renders (this is why we have the [`React.memo`](https://reactjs.org/docs/react-api.html#reactmemo) API for functional components and `shouldComponentUpdate` for class components). If you have used the [React DevTools](https://www.npmjs.com/package/react-devtools) package before, you may have even seen it stated explicitly in the Profiler output!
+
+<Image caption="Output from the React Profiler" src="/profiler_output.png" height={100} />
+
+As React developers, we believe we understand this pretty well! Every component exists in a hierarchy within our React application. At the very top of the hierarchy we have a component which was rendered into a "root" DOM node somewhere in the webpage. Below that ends up being a big 'ol tree of React components which contain state, fetch data, display text, collect user data, etc. When some state within any component changes, React does a process called [reconciliation](https://reactjs.org/docs/reconciliation.html) to decide which subtree(s) of your application need to re-render because of that state change.
+
+That all seems kind of obvious and ideally unnecessary for a React developer to know, it is just React doing it's job. In my experience with working with large React applications I have found that this is in fact _very important and necessary_ to understand as it can have massive implications on the performance of your application. 
+
+## What's the big whoop? It's just a render...
+
+The "big whoop" is that a render can end up being really expensive. That is not always the case but as your application grows, so does the computational cost of your renders. Consider this artificially expensive application. 
+
+```jsx
+const ExpensiveComponent = ({ maxNum }) => {
+	return (
+        <div>
+            {[...Array(maxNum).keys()].map((val, index) => {
+                return <div>{index}</div>;
+            })}
+        </div>
+    );
+}
+
+const App = () => {
+    const [maxNum, setMaxNum] = useState(1);
+
+    const increment = () => setMaxNum((maxNum) => maxNum + 1);
+
+    return (
+		<div>
+			<button onClick={increment}>+</button>
+			<div>
+				{[...Array(maxNum).keys()].map(() => <ExpensiveComponent maxNum={maxNum} />)}
+			</div>
+		</div>
+    );
+}
+```
+
+For some set of low numbers and hardware, this application really isn't that badly performing. It renders a couple components that each count one through the number of current components. But each time we increment, the renders get more expensive.
+
+<p class="codepen" data-height="550" data-default-tab="js,result" data-slug-hash="MWvQQrr" data-user="jbean96" style={{ height: "550px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid", margin: "1em 0", padding: "1em"}}>
+  <span>See the Pen <a href="https://codepen.io/jbean96/pen/MWvQQrr">
+  Artificially Expensive Application</a> by Joshua Bean (<a href="https://codepen.io/jbean96">@jbean96</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+(I recommend opening the JS and changing the initial state value to 1000 to see the effects of slow rendering)
+
+Obviously, we are never going to write code this silly or contrived, but the problem of expensive renders exist and many times we just can't get around it. But there are a lot of things to mitigate the negative effects.
+
+## So, back to the `children` prop
+
+Yes, the `children` prop. My goal, for the rest of this post, is to convince you (and maybe the React dev team) that the `children` prop should be called something other than "children". The reason being that calling said prop "children" makes me, and probably _almost every React dev_ believe that the components that get rendered via `children` are _Child Components_ of the component (the _Parent Component_) to which they are passed. That is in fact **entirely false**. 
+
+Let's start by making a hook that we can use to provide any component with the functionality/state necessary to keep track of a counter. Additionally we'll provide some components that can be used to modify and display that state.
+
+```jsx useAccordion=true rowCutoff=5
+const useCounter = () => {
+    const [count, setCount] = useState(0);
+
+    const increment = () => setCount((count) => count + 1);
+    const decrement = () => setCount((count) => count - 1);
+
+    return {
+        count,
+        increment,
+        decrement,
+    };
+}
+
+const Controls = ({ increment, decrement }) => {
+    return (
+        <>
+            <button onClick={increment}>+</button>
+            <button onClick={decrement}>-</button>
+        </>
+    );
+}
+
+const Display = ({ count }) => {
+    return (
+        <div>
+            Count: {count}
+        </div>
+    );
+}
+```
+
+Now, using this hook I'm going to write two versions of the same application which is just going to have 3 nested counter components. The outer counter will have a red background, the middle counter will have a green background and the inner-most counter will have a blue background.
+
+```jsx useAccordion=true
+const BlueCounter = () => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: "blue" }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            <BlueCounter />
+        </div>
+    );
+}
+
+const GreenCounter = () => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: "green" }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            <BlueCounter />
+        </div>
+    );
+}
+
+const RedCounter = () => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: "red" }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            <GreenCounter />
+        </div>
+    );
+}
+
+const App = () => {
+    return (
+        <RedCounter />
+    );
+}
+```
+
+Before looking at the CodePen a few notes:
+
+1. There's some additional code in the Pen having to do with the `RenderDisplay` component which gives a visual indication when one of our counters renders. That code does not impact the rendering of the counters in the application (if it did we would end up with an infinite loop).
+2. Each time a counter renders, a box of the same color will appear at the top of the application. The number in that box is the number of times that colored counter has rendered since the box last disappeared.
+
+<p class="codepen" data-height="550" data-default-tab="result" data-slug-hash="abypOWG" data-user="jbean96" style={{ height: "550px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid", margin: "1em 0", padding: "1em"}}>
+  <span>See the Pen <a href="https://codepen.io/jbean96/pen/abypOWG">
+  RGB Counters</a> by Joshua Bean (<a href="https://codepen.io/jbean96">@jbean96</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+Before I continue, I can literally hear you critiquing my code: "You just wrote the same component three times, you should have just made a base `Counter` component which accepted the color as a prop", which I 110% agree with and have two responses to. 
+
+1. I am not here to write perfect code for you, I am here to write code which demonstrates a concept which had profound implications on my component structure and understanding of React. 
+2. This is not inherent to recursive components. `GreenCounter` could very well be a text area and `BlueCounter` could be a radio button group. The fact that all three components are functionally the same is a "coincidence" and is irrelevant in this case. 
+
+What I have done in the above application is created the following Parent/Child component structure. `App` is the Parent Component of `RedCounter`. `RedCounter` is the Parent Component of `GreenCounter`. `GreenCounter` is the Parent Component of `BlueCounter`. We can see this because whenever I click `+`/`-` in the `RedCounter`, the render indicators for the `BlueCounter` and `GreenCounter` appear.
+
+Conversely, `BlueCounter` is a Child Component of `GreenCounter`. `GreenCounter` is a Child Component of `RedCounter`. And finally, `RedCounter` is a Child Component of `App`. 
+
+<Highlight>
+    <p>
+        This has the following rendering implications. Whenever <inlineCode>RedCounter</inlineCode> renders, <inlineCode>GreenCounter</inlineCode> will render. Whenever <inlineCode>GreenCounter</inlineCode> renders, <inlineCode>BlueCounter</inlineCode> will render. We can observe this by clicking the <inlineCode>+</inlineCode>/<inlineCode>-</inlineCode> buttons in the <inlineCode>RedCounter</inlineCode>, when either is clicked render indicators for the <inlineCode>BlueCounter</inlineCode> and <inlineCode>GreenCounter</inlineCode> appear in addition to the indicator for the <inlineCode>RedCounter</inlineCode>. The <inlineCode>RedCounter</inlineCode> rendered which caused it's Child Components including the <inlineCode>GreenCounter</inlineCode> to render which caused it's Child Components including the <inlineCode>BlueCounter</inlineCode> to render. If we do the same with the <inlineCode>GreenCounter</inlineCode> we see the indicators for the <inlineCode>GreenCounter</inlineCode> and <inlineCode>BlueCounter</inlineCode>.
+    </p>
+</Highlight>
+
+## Let's try again
+
+As smart React developers, we know that the renders of the Child Components are 100% unnecessary. The state of the nested counters are not at all dependent on the counters in which they are nested in. Their state and appearence are _completely independent_ of their Parent counter.
+
+Because I mentioned it earlier, I will say that one solution would be to memoize each of our components with `React.memo`. This would achieve the desired effect of isolating their renders, but it would be masking the real problem which is that we have an incorrect (or non-optimal) component structure.
+
+Let's try rewriting the application:
+
+```jsx useAccordion=true
+const BlueCounter = ({ children }) => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: "blue" }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            {children}
+        </div>
+    );
+}
+
+const GreenCounter = ({ children }) => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: "green" }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            {children}
+        </div>
+    );
+}
+
+const RedCounter = ({ children }) => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: "red" }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            {children}
+        </div>
+    );
+}
+
+const App = () => {
+    return (
+        <RedCounter>
+            <GreenCounter>
+                <BlueCounter />
+            </GreenCounter>
+        </RedCounter>
+    );
+}
+```
+
+I can sense your facepalm, "Just write `Counter` with a `color` prop, ya noob"... if it really bothers you that much, maybe you should just write it? Cool? Cool.
+
+<p class="codepen" data-height="550" data-default-tab="result" data-slug-hash="wvqgajG" data-user="jbean96" style={{ height: "550px", boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid", margin: "1em 0", padding: "1em"}}>
+  <span>See the Pen <a href="https://codepen.io/jbean96/pen/wvqgajG">
+  RGB Counters - Using `children` prop</a> by Joshua Bean (<a href="https://codepen.io/jbean96">@jbean96</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+Previously, I thought this writing of the application was exactly the same as the first version. We passed the components via the `children` prop, surely that makes the Child Components of the component we passed them to. By now you already know, but I'll spell it out to make sure, **passing components via the `children` prop does not make them Child Components of the component to which they were passed**.
+
+We can demonstrate the lack of Parent/Child Component relationships this the same way we demonstrated their presence in the first application. Click the `+`/`-` buttons on _any counter_ and observe that the only render indicator that appears is the one that corresponds with the counter which was clicked.
+
+## Conclusion
+
+So quick recap of what we went over here. 
+
+<Highlight>
+    <ul>
+        <li>By default components will render when their Parent Component renders</li>
+        <li>A Parent/Child relationship is established between components when the Parent Component constructs the Child Component in it's <inlineCode>render</inlineCode> function (primarily via JSX)</li>
+        <li>A Parent/Child relationship <em>is not established</em> between components when a component is passed to another component via the <inlineCode>children</inlineCode> prop</li>
+        <li>Thus passing component <inlineCode>A</inlineCode> to component <inlineCode>B</inlineCode> via the <inlineCode>children</inlineCode> prop will make it so that <inlineCode>A</inlineCode> does not <em>necessarily</em> render when <inlineCode>B</inlineCode> renders</li>
+    </ul>
+</Highlight>
+
+My stated goal of this post was to convince you that `children` is a total misnomer and can be very misleading. Realistically, even if the React dev team agreed with me, I am not sure that it would ever make it into a release. Switching the name of that prop to something else in large codebases would be, not impossible, but a major headache. That being said, Dan Abramov, if you're reading this, I would just copy [Svelte and call that prop `slot`](https://svelte.dev/tutorial/slots). `slot` does a much better job of indicating that it's simply exposing a vacancy in it's DOM hierarchy for other elements to be rendered into.
+
+## How should this influence my code?
+
+Primarily the answer is to avoid creating Parent/Child component relationships when they are not necessary by utilizing the `children` prop. This isn't always entirely obvious though. A technique that I am trying my best to apply is to think about breaking down large components whenever they seem to be getting out of hand. For example, let's look at the following component:
+
+```jsx
+const MyComponent = () => {
+    const [state1, setState1] = useState(false);
+    const [state2, setState2] = useState(0);
+    const context = useContext(ApplicationContext);
+
+    ...
+
+    return (
+        <div>
+            <SomeDisplayComponent value={state2} />
+            <Component2>
+                <OtherComponent />
+                <AnotherComponent />
+                <AnotherNestingComponent>
+                    <OtherComponent2 />
+                </AnotherNestingComponent>
+            </Component2>
+            <Component3 value={state1}>
+                <button onClick={...}>Click me!</button>
+            </Component3>
+            ...
+        </div>
+    )
+}
+```
+
+There are some things we should recognize that immediately cannot be done to break-down this component.
+
+- Inherently `SomeDisplayComponent` and `Component3` _need_ to be rendered by this component since they are taking `MyComponent`'s internal state as props
+- One way around this would be to use `Context`, however, those components would still effectively be Child Components of `MyComponent` since whenever `MyComponent`'s internal state updates they would need to re-render to handle the state update
+
+There is still some possibility for breaking down though! `Component2` and all of it's nested components (not "children" because all of those nested components are children of `MyComponent`) could be passed to `MyComponent` via `children`! This would have the benefit of preventing those components from being rendered whenever `state1`, `state2` or `ApplicationContext` change.
+
+It's not always reasonable to do this kind of component decomposition though. Just like everything in software development, it's up to the developer to make a reasonable decision by analyzing the tradeoffs. Perhaps from a styling perspective it is just much simpler to keep `Component2` as a child component, and that might be okay because `Component2` might be incredibly inexpensive to render! You could also change the definition of `Component2` to be memoized with `React.memo` and get the same effect as passing it via `children`.
+
+## One last thought
+
+Okay it bothered me too...
+
+```js
+const Counter = ({ children, color }) => {
+    const { count, increment, decrement } = useCounter();
+
+    return (
+        <div style={{ background: color }}>
+            <Controls increment={increment} decrement={decrement} />
+            <Display count={count} />
+            {children}
+        </div>
+    );
+}
+
+const App = () => {
+    return (
+        <Counter color="red">
+            <Counter color="green">
+                <Counter color="blue" />
+            </Counter>
+        </Counter>
+    );
+}
+```
+
+Thanks for reading! I hope you learned something and would love to hear your thoughts.
