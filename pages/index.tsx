@@ -1,51 +1,46 @@
+import path from "path";
+import fs from "fs";
+
 import Head from "next/head";
-import Link from "next/link";
-import type { NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import React from "react";
-import { Button, Typography, useTheme } from "@mui/material";
-import styled from "styled-components";
+import glob from "glob";
+import matter from "gray-matter";
+import { Stack } from "@mui/material";
 
-import { Mountain } from "components/background/Mountain";
+import { PostData, validatePostMetadata } from "components/posts";
+import { Card } from "components/posts/Card";
+import { BlogHeader } from "components/BlogHeader";
 
-const StyledBackground = styled.div`
-  & {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+// TODO: Make this getRenderedProps and fetch the lists of posts from elsewhere
+export const getStaticProps: GetStaticProps<{ posts: PostData[] }> = async () => {
+  const paths = glob.sync("posts/**/post.mdx");
 
-    .mountain1 {
-      transform: scaleY(5) scaleX(4);
-      position: absolute;
-      bottom: 0;
-      left: -250px;
-      transform-origin: bottom left;
-    }
+  const posts = paths
+      .map(filePath => {
+          const parsedPath = path.parse(filePath);
+          const splitDirs = parsedPath.dir.split(path.sep);
+          const slug = splitDirs[splitDirs.length - 1];
 
-    .mountain2 {
-      transform: scale(3);
-      position: absolute;
-      bottom: 0;
-      left: 10px;
-      transform-origin: bottom left;
-    }
-  }
-`;
+          const markdownWithMeta = fs.readFileSync(filePath);
+          const { data } = matter(markdownWithMeta);
 
-const StyledMain = styled.main`
-  & {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 500px;
-  }
-`;
+          if (!validatePostMetadata(data)) {
+              throw new Error(`Invalid post metadata: ${filePath}`);
+          }
 
-const Home: NextPage = () => {
-  const theme = useTheme();
+          return {
+              metadata: data,
+              slug
+          };
+      });
 
+  // TODO: Sort by date
+
+  return { props: { posts } };
+};
+
+const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ posts }) => {
   return (
     <>
       <Head>
@@ -54,14 +49,10 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <StyledMain>
-        <Typography variant="h1">Hey I&#39;m Josh</Typography>
-        <Link href="/blog" passHref><Button>Blog</Button></Link>
-        <StyledBackground>
-          <Mountain className="mountain1" primary={theme.palette.primary.main} secondary={theme.palette.primary.light} />
-          <Mountain className="mountain2" primary={theme.palette.secondary.main} secondary={theme.palette.secondary.light} />
-        </StyledBackground>
-      </StyledMain>
+      <BlogHeader />
+      <Stack spacing={3}>
+          {posts.map(post => <Card key={post.slug} post={post} />)}
+      </Stack>
     </>
   );
 };

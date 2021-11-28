@@ -11,30 +11,43 @@ import { bundleMDX } from "mdx-bundler";
 import { getMDXComponent } from "mdx-bundler/client";
 import { remarkMdxCodeMeta } from "remark-mdx-code-meta";
 
-import { PageTitle } from "components/PageTitle";
+import { SubTitle, Title } from "components/posts/Title";
 import { PostMetadata, validatePostMetadata } from "components/posts";
-import { Code, Pre } from "posts/components/Code";
-import Highlight from "posts/components/Highlight";
+import { Code, Pre } from "components/posts/Code";
+import { BlockQuote } from "components/posts/BlockQuote";
+
+const StyledParagraph = styled(Typography)`
+    margin-bottom: ${({ theme }) => theme.spacing(2)};
+
+    ${({ theme }) => theme.breakpoints.down("md")} {
+        text-align: justify;
+    }
+`;
 
 const Paragraph: FC = ({ children }) => {
-    return <Typography sx={{ mb: theme => theme.spacing(2) }} variant="body1">{children}</Typography>;
+    return <StyledParagraph variant="body1">{children}</StyledParagraph>;
 };
 
 const StyledUl = styled.ul`
-    & {
-        list-style: none;
-        margin: ${({ theme }) => theme.spacing(2, 0)};
-        padding-left: ${({ theme }) => theme.spacing(4)};
+    list-style: none;
+    padding-left: ${({ theme }) => theme.spacing(0)};
+
+    ${({ theme }) => theme.breakpoints.down("md")} {
+        text-align: justify;
+    }
+`;
+
+const StyledOl = styled.ol`
+    ${({ theme }) => theme.breakpoints.down("md")} {
+        text-align: justify;
     }
 `;
 
 const StyledLi = styled.li`
-    & {
-        margin-bottom: ${({ theme }) => theme.spacing(2)};
-    }
+    margin-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
-const ListItem = ({ children }) => {
+const ListItem: FC = ({ children }) => {
     return (
         <StyledLi>
             <Typography variant="body1">{children}</Typography>
@@ -71,8 +84,6 @@ export const getStaticProps: GetStaticProps<PostProps, { slug: string }> = async
     }
     const { slug } = params;
 
-    console.log(process.cwd());
-
     const { code: compiledMdx, frontmatter: data } = await bundleMDX<PostMetadata>({
         file: path.resolve("posts", slug, "post.mdx"),
         cwd: path.resolve("posts", slug),
@@ -83,13 +94,7 @@ export const getStaticProps: GetStaticProps<PostProps, { slug: string }> = async
             options.remarkPlugins = [...(options.remarkPlugins ?? []), remarkMdxCodeMeta];
             return options;
         }
-        // esbuildOptions: (options) => {
-        //     options.platform = "node";
-        //     return options;
-        // }
     });
-
-    console.log(compiledMdx);
 
     if (!validatePostMetadata(data)) {
         throw new Error(`Invalid post metadata: ${slug}`);
@@ -105,16 +110,12 @@ export const getStaticProps: GetStaticProps<PostProps, { slug: string }> = async
 };
 
 const Post: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ data, compiledMdx }) => {
-    const MDXComponent = useMemo(() => {
-        return getMDXComponent(
-            compiledMdx
-        );
-    }, [compiledMdx]);
+    const MDXComponent = useMemo(() => getMDXComponent(compiledMdx), [compiledMdx]);
 
     return (
         <Container maxWidth={"md"}>
-            <PageTitle backButton>{data.title}</PageTitle>
-            <Typography sx={{ mb: theme => theme.spacing(4) }} variant="subtitle2">{data.date}</Typography>
+            <Title backButton>{data.title}</Title>
+            <SubTitle>{data.date}</SubTitle>
             <MDXComponent
                 components={{
                     // Image: PostImage,
@@ -125,12 +126,13 @@ const Post: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ data, 
                     code: Code,
                     li: ListItem,
                     p: Paragraph,
-                    "blockquote": Highlight,
-                    ul: StyledUl
+                    "blockquote": BlockQuote,
+                    ul: StyledUl,
+                    ol: StyledOl
                 }}
             />
-            <Link href="/blog" passHref>
-                <Button startIcon={<ArrowBack />} sx={{ mb: theme => theme.spacing(2)}}>Return to Blog</Button>
+            <Link href="/" passHref>
+                <Button startIcon={<ArrowBack />} sx={{ mb: theme => theme.spacing(2)}}>Return to Home</Button>
             </Link>
         </Container>
     );
