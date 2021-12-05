@@ -8,7 +8,7 @@ interface TitleProps {
     backButton?: boolean;
 }
 
-const BackButtonWrapper = styled(IconButton)`
+const BackButtonWrapper = styled.div`
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
@@ -42,8 +42,11 @@ export const Title: FC<TitleProps> = ({ backButton, children }) => {
             >
                 {children}
             </BlogTitle>
-            {backButton && <BackButtonWrapper onClick={() => router.back()}>
-                <ArrowBack />
-            </BackButtonWrapper>}
+            {backButton &&
+                <BackButtonWrapper>
+                    <IconButton onClick={() => router.back()}>
+                        <ArrowBack />
+                    </IconButton>
+                </BackButtonWrapper>}
         </Box>);
 };

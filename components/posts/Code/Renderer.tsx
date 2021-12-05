@@ -1,13 +1,16 @@
-import { Add, Remove } from "@mui/icons-material";
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/material";
-import React, { FC, useState } from "react";
+import { Add, Remove, ShortText, WrapText } from "@mui/icons-material";
+import { Accordion, AccordionDetails, AccordionSummary, IconButton, Tooltip, Typography } from "@mui/material";
+import React, { FC, useContext, useState } from "react";
 import styled from "styled-components";
 import { createElement } from "react-syntax-highlighter";
+
+import { CodeStyleContext } from ".";
 
 const StyledAccordion = styled(Accordion)`
     --expanderHeight: 32px;
 
     &.code-accordion {
+        color: unset;
         background-color: unset;
         border-radius: 0;
         padding-bottom: var(--expanderHeight);
@@ -34,6 +37,12 @@ const StyledAccordion = styled(Accordion)`
     }
 `;
 
+const StyledIconButton = styled(IconButton)`
+    display: block;
+    line-height: 0;
+    margin-left: auto;
+`;
+
 interface RendererAccordionProps {
     defaultExpanded?: boolean;
     useAccordion?: boolean;
@@ -55,12 +64,18 @@ export const Renderer: FC<RendererProps & RendererAccordionProps> = ({
     useAccordion = false,
     rowCutoff = 10
 }) => {
+    const { wrapLongLines, toggleWrapLongLines } = useContext(CodeStyleContext);
     const [expanded, setExpanded] = useState(defaultExpanded);
 
     const handleOnChange = () => setExpanded(expanded => !expanded);
 
     return (
         <>
+            <Tooltip title={wrapLongLines ? "Unwrap lines" : "Wrap long lines"}>
+                <StyledIconButton onClick={toggleWrapLongLines}>
+                    {wrapLongLines ? <ShortText /> : <WrapText />}
+                </StyledIconButton>
+            </Tooltip>
             {(useAccordion ? rows.slice(0, rowCutoff) : rows)
                 .map((row, index) => createElement({ key: index, node: row, stylesheet, useInlineStyles }))}
             {useAccordion && <StyledAccordion

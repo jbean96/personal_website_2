@@ -1,4 +1,4 @@
-import { Switch, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import React, { VFC } from "react";
 import Image from "next/image";
 import styled from "styled-components";

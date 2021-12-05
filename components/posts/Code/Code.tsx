@@ -1,15 +1,19 @@
 import React, { FC, useContext } from "react";
 import { Prism as ReactSyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark, materialLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import styled from "styled-components";
 
-import { CodeDisplayContext, Renderer, RendererProps } from "components/posts/Code";
+import { CodeDisplayContext, CodeStyleContext, Renderer, RendererProps } from "components/posts/Code";
+import { DarkModeContext } from "components/DarkMode";
 
 const InlineCode = styled.code`
-    & {
-        background-color: ${({ theme }) => theme.palette.code};
-        border-radius: ${({ theme }) => theme.spacing(0.5)};
-        padding: ${({ theme }) => theme.spacing(0, 0.5)};
-    }
+    background-color: ${({ theme }) => theme.palette.code};
+    border-radius: ${({ theme }) => theme.spacing(0.5)};
+    padding: ${({ theme }) => theme.spacing(0, 0.5)};
+`;
+
+const StyledReactSyntaxHighlighter = styled(ReactSyntaxHighlighter)`
+    border-radius: ${({ theme }) => theme.spacing(1)};
 `;
 
 interface CodeProps {
@@ -28,14 +32,19 @@ interface CodeProps {
  */
 export const Code: FC<CodeProps> = ({ className, children }) => {
     const { defaultExpanded, rowCutoff, useAccordion } = useContext(CodeDisplayContext);
+    const { isDarkModeEnabled } = useContext(DarkModeContext);
+    const { wrapLongLines } = useContext(CodeStyleContext);
 
     if (!className?.startsWith("language")) {
         return <InlineCode>{children}</InlineCode>;
     }
 
     return (
-        <ReactSyntaxHighlighter
+        <StyledReactSyntaxHighlighter
             language="jsx"
+            style={isDarkModeEnabled ? materialDark : materialLight}
+            useInlineStyles
+            wrapLongLines={wrapLongLines}
             renderer={(props: RendererProps) =>
                 <Renderer
                     {...props}
@@ -45,6 +54,6 @@ export const Code: FC<CodeProps> = ({ className, children }) => {
                 />}
         >
             {children}
-        </ReactSyntaxHighlighter>
+        </StyledReactSyntaxHighlighter>
     );
 };
