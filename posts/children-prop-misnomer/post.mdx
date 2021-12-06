@@ -7,7 +7,7 @@ tags: React
 
 If you have been using React for awhile, you have most likely developed some understanding of the component lifecycle and rendering process. You may have made the observation before that components will re-render whenever their parent component re-renders (this is why we have the [`React.memo`](https://reactjs.org/docs/react-api.html#reactmemo) API for functional components and `shouldComponentUpdate` for class components). If you have used the [React DevTools](https://www.npmjs.com/package/react-devtools) package before, you may have even seen it stated explicitly in the Profiler output!
 
-{/* <Image caption="Output from the React Profiler" src="/profiler_output.png" height={100} /> */}
+<Image alt="Output from the React Profiler" caption="Output from the React Profiler" src="/posts/children-prop-misnomer/profiler_output.png" width={402} height={93} />
 
 As React developers, we believe we understand this pretty well! Every component exists in a hierarchy within our React application. At the very top of the hierarchy we have a component which was rendered into a "root" DOM node somewhere in the webpage. Below that ends up being a big 'ol tree of React components which contain state, fetch data, display text, collect user data, etc. When some state within any component changes, React does a process called [reconciliation](https://reactjs.org/docs/reconciliation.html) to decide which subtree(s) of your application need to re-render because of that state change.
 

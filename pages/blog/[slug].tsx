@@ -12,6 +12,7 @@ import { getMDXComponent } from "mdx-bundler/client";
 import { remarkMdxCodeMeta } from "remark-mdx-code-meta";
 
 import { SubTitle, Title } from "components/posts/Title";
+import { Image } from "components/posts/Image";
 import { PostMetadata, validatePostMetadata } from "components/posts";
 import { Code, Pre } from "components/posts/Code";
 import { BlockQuote } from "components/posts/BlockQuote";
@@ -126,9 +127,10 @@ const Post: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ data, 
                     code: Code,
                     li: ListItem,
                     p: Paragraph,
-                    "blockquote": BlockQuote,
+                    blockquote: BlockQuote,
                     ul: StyledUl,
-                    ol: StyledOl
+                    ol: StyledOl,
+                    Image
                 }}
             />
             <Link href="/" passHref>

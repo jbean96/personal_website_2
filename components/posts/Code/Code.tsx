@@ -2,6 +2,7 @@ import React, { FC, useContext } from "react";
 import { Prism as ReactSyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark, materialLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import styled from "styled-components";
+import { useTheme } from "@mui/material";
 
 import { CodeDisplayContext, CodeStyleContext, Renderer, RendererProps } from "components/posts/Code";
 import { DarkModeContext } from "components/DarkMode";
@@ -34,6 +35,7 @@ export const Code: FC<CodeProps> = ({ className, children }) => {
     const { defaultExpanded, rowCutoff, useAccordion } = useContext(CodeDisplayContext);
     const { isDarkModeEnabled } = useContext(DarkModeContext);
     const { wrapLongLines } = useContext(CodeStyleContext);
+    const theme = useTheme();
 
     if (!className?.startsWith("language")) {
         return <InlineCode>{children}</InlineCode>;
@@ -43,6 +45,7 @@ export const Code: FC<CodeProps> = ({ className, children }) => {
         <StyledReactSyntaxHighlighter
             language="jsx"
             style={isDarkModeEnabled ? materialDark : materialLight}
+            customStyle={{ margin: theme.spacing(0, 0, 2, 0) }}
             useInlineStyles
             wrapLongLines={wrapLongLines}
             renderer={(props: RendererProps) =>

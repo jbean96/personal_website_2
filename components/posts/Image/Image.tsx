@@ -1,6 +1,7 @@
-import { Box, styled, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React, { FC } from "react";
 import { default as NextImage } from "next/image";
+import styled from "styled-components";
 
 interface ImageProps {
     alt?: string;
@@ -9,17 +10,17 @@ interface ImageProps {
     src: string;
 }
 
-const CenteredCaption = styled(Typography)(() => ({
-    display: "inline-block",
-    left: "50%",
-    maxWidth: "300px",
-    position: "relative",
-    transform: "translate(-50%)"
-}));
+const CenteredCaption = styled(Typography)`
+    display: inline-block;
+    left: 50%;
+    maxWidth: 300px;
+    position: relative;
+    transform: translate(-50%);
+`;
 
 export const Image: FC<ImageProps> = ({ alt, caption, height, src }) => {
     return (
-        <Box style={{ position: "relative" }} sx={{ my: 1 }}>
+        <Box style={{ position: "relative" }} sx={{ mb: 2 }}>
             <div style={{ position: "relative", height: `${height}px`, width: "100%"}}>
                 <NextImage alt={alt} src={src} layout="fill" objectFit="contain" />
             </div>
