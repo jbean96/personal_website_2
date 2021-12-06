@@ -6,11 +6,13 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import React from "react";
 import glob from "glob";
 import matter from "gray-matter";
-import { Stack } from "@mui/material";
+import { Container, Stack } from "@mui/material";
+import styled from "styled-components";
 
 import { PostData, validatePostMetadata } from "components/posts";
 import { Card } from "components/posts/Card";
 import { BlogHeader } from "components/BlogHeader";
+import { BlogFooter } from "components/BlogFooter";
 
 // TODO: Make this getRenderedProps and fetch the lists of posts from elsewhere
 export const getStaticProps: GetStaticProps<{ posts: PostData[] }> = async () => {
@@ -40,9 +42,22 @@ export const getStaticProps: GetStaticProps<{ posts: PostData[] }> = async () =>
     return { props: { posts } };
 };
 
+const StyledHome = styled(Container)`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+    overflow-y: auto;
+    min-width: 440px;
+
+    .blog-footer {
+        margin-top: auto;
+    }
+`;
+
 const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ posts }) => {
     return (
-        <>
+        <StyledHome maxWidth="md">
             <Head>
                 <title>Josh Bean</title>
                 <meta name="description" content="Josh Bean's blog" />
@@ -52,7 +67,8 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ posts 
             <Stack spacing={3}>
                 {posts.map(post => <Card key={post.slug} post={post} />)}
             </Stack>
-        </>
+            <BlogFooter className="blog-footer" />
+        </StyledHome>
     );
 };
 

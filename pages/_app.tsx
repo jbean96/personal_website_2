@@ -1,7 +1,6 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import React from "react";
-import { Container } from "@mui/material";
 import { NextPageContext } from "next";
 import CssBaseline from "@mui/material/CssBaseline";
 
@@ -20,12 +19,7 @@ function App({
             <CodeStyleContextProvider initialWrapLongLines={initialWrapLongLines}>
                 <ThemeProvider>
                     <CssBaseline />
-                    <Container
-                        maxWidth="md"
-                        style={{ minWidth: "440px" }}
-                    >
-                        <Component {...pageProps} />
-                    </Container>
+                    <Component {...pageProps} />
                 </ThemeProvider>
             </CodeStyleContextProvider>
         </DarkModeContextProvider>
