@@ -46,10 +46,12 @@ export default async function handler(
 ) {
     try {
         if (access == null || Date.now() >= access.expires_at) {
-            const refreshedAccess = await refreshAccessToken();
-            access = { ...refreshedAccess, expires_at: Date.now() + refreshedAccess.expires_in * 1000 };
+            const { expires_in, ...rest } = await refreshAccessToken();
+            access = { ...rest, expires_at: Date.now() + expires_in * 1000 };
         }
         const response = await getCurrentlyPlayingTrack();
+        // If no song is playing, response.data is an empty string and we should just return undefined instead
+        console.log(response.status);
         res.status(response.status).json(response.data);
     } catch (error) {
         res.status(400).send(error);

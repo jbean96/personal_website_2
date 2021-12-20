@@ -1,8 +1,7 @@
-import axios from "axios";
-import { useEffect, useState, VFC } from "react";
+import { VFC } from "react";
 import styled from "styled-components";
 
-import { CurrentlyPlayingTrack } from "types/spotify";
+import { CurrentlyPlayingTrack } from "components/Spotify";
 
 const StyledBlogFooter = styled.div`
     padding: ${({ theme }) => theme.spacing(2, 4)};
@@ -24,17 +23,10 @@ export interface BlogFooterProps {
 }
 
 export const BlogFooter: VFC<BlogFooterProps> = ({ className }) => {
-    const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<CurrentlyPlayingTrack>();
-
-    useEffect(() => {
-        axios.get<CurrentlyPlayingTrack>("/api/spotify/current")
-            .then((response) => setCurrentlyPlayingTrack(response.data));
-    }, []);
-
     return (
         <StyledBlogFooter className={className}>
             <div className="text-wrapper">
-                {currentlyPlayingTrack?.item.name}
+                <CurrentlyPlayingTrack />
             </div>
         </StyledBlogFooter>
     );
