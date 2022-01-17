@@ -4,7 +4,7 @@ import glob from "glob";
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Link from "next/link";
 import { Button, Container, Typography } from "@mui/material";
-import React, { PropsWithChildren, useMemo} from "react";
+import React, { PropsWithChildren, useMemo } from "react";
 import { ArrowBack } from "@mui/icons-material";
 import styled from "styled-components";
 import { bundleMDX } from "mdx-bundler";
@@ -59,17 +59,16 @@ const ListItem = ({ children }: PropsWithChildren<{}>) => {
 export const getStaticPaths: GetStaticPaths = async () => {
     const paths = glob.sync("posts/**/post.mdx");
 
-    const slugs = paths
-        .map(filePath => {
-            const parsedPath = path.parse(filePath);
-            const splitDirs = parsedPath.dir.split(path.sep);
+    const slugs = paths.map((filePath) => {
+        const parsedPath = path.parse(filePath);
+        const splitDirs = parsedPath.dir.split(path.sep);
 
-            return { params: { slug: splitDirs[splitDirs.length - 1] }};
-        });
+        return { params: { slug: splitDirs[splitDirs.length - 1] } };
+    });
 
     return {
         paths: slugs,
-        fallback: false
+        fallback: false,
     };
 };
 
@@ -92,7 +91,7 @@ export const getStaticProps: GetStaticProps<PostProps, { slug: string }> = async
             // @ts-ignore
             options.remarkPlugins = [...(options.remarkPlugins ?? []), remarkMdxCodeMeta];
             return options;
-        }
+        },
     });
 
     if (!validatePostMetadata(data)) {
@@ -103,8 +102,8 @@ export const getStaticProps: GetStaticProps<PostProps, { slug: string }> = async
         props: {
             data,
             slug,
-            compiledMdx
-        }
+            compiledMdx,
+        },
     };
 };
 
@@ -117,10 +116,24 @@ const Post: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ data, 
             <SubTitle>{data.date}</SubTitle>
             <MDXComponent
                 components={{
-                    // Image: PostImage,
-                    h1: (props) => <Typography sx={{ mt: theme => theme.spacing(4), mb: theme => theme.spacing(2.5) }} variant="h1" {...props} />,
-                    h2: (props) => <Typography sx={{ mt: theme => theme.spacing(4), mb: theme => theme.spacing(2.5) }} variant="h2" {...props} />,
-                    h3: (props) => <Typography sx={{ mt: theme => theme.spacing(4), mb: theme => theme.spacing(2.5) }} variant="h2" {...props} />,
+                    h1: () => (
+                        <Typography
+                            sx={{ mt: (theme) => theme.spacing(4), mb: (theme) => theme.spacing(2.5) }}
+                            variant="h1"
+                        />
+                    ),
+                    h2: () => (
+                        <Typography
+                            sx={{ mt: (theme) => theme.spacing(4), mb: (theme) => theme.spacing(2.5) }}
+                            variant="h2"
+                        />
+                    ),
+                    h3: () => (
+                        <Typography
+                            sx={{ mt: (theme) => theme.spacing(4), mb: (theme) => theme.spacing(2.5) }}
+                            variant="h2"
+                        />
+                    ),
                     pre: Pre,
                     code: Code,
                     li: ListItem,
@@ -128,11 +141,13 @@ const Post: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ data, 
                     blockquote: BlockQuote,
                     ul: StyledUl,
                     ol: StyledOl,
-                    Image
+                    Image,
                 }}
             />
             <Link href="/" passHref>
-                <Button startIcon={<ArrowBack />} sx={{ mb: theme => theme.spacing(2)}}>Return to Home</Button>
+                <Button startIcon={<ArrowBack />} sx={{ mb: (theme) => theme.spacing(2) }}>
+                    Return to Home
+                </Button>
             </Link>
         </Container>
     );

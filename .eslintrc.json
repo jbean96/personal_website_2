@@ -3,7 +3,8 @@
     "next/core-web-vitals", 
     "eslint:recommended",
     "plugin:import/recommended",
-    "plugin:import/typescript"
+    "plugin:import/typescript",
+    "prettier"
   ],
   "rules": {
     "import/order": ["error", { "newlines-between": "always" }],
@@ -12,7 +13,6 @@
     "quotes": "error",
     "semi": "error",
     "max-len": ["error", { "code": 120 }],
-    "comma-dangle": "error",
     "no-trailing-spaces": "error"
   }
 }

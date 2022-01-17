@@ -19,8 +19,15 @@ export const getEnvVariables = (): EnvVariables => {
     const stravaRefreshToken = process.env.STRAVA_REFRESH_TOKEN;
     const expiresAt = process.env.STRAVA_EXPIRES_AT;
 
-    if (domain == null || stravaClientId == null || stravaClientSecret == null || stravaAccessToken == null || stravaRefreshToken == null || expiresAt == null) {
-        throw new Error('Missing environment varibable');
+    if (
+        domain == null ||
+        stravaClientId == null ||
+        stravaClientSecret == null ||
+        stravaAccessToken == null ||
+        stravaRefreshToken == null ||
+        expiresAt == null
+    ) {
+        throw new Error("Missing environment varibable");
     }
 
     return {
@@ -33,4 +40,4 @@ export const getEnvVariables = (): EnvVariables => {
             clientSecret: stravaClientSecret,
         },
     };
-}
+};

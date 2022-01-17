@@ -12,7 +12,8 @@ import { CodeStyleContextProvider, WRAP_LONG_LINES_COOKIE_KEY } from "components
 function App({
     Component,
     pageProps,
-    props: { initialIsDarkModeEnabled, initialWrapLongLines }
+    // @ts-ignore
+    props: { initialIsDarkModeEnabled, initialWrapLongLines },
 }: AppProps<AppInitialProps>) {
     return (
         <DarkModeContextProvider initialIsDarkModeEnabled={initialIsDarkModeEnabled}>
@@ -27,18 +28,20 @@ function App({
 }
 
 interface AppInitialProps {
-  props: {
-    initialIsDarkModeEnabled: boolean;
-    initialWrapLongLines: boolean;
-  };
+    props: {
+        initialIsDarkModeEnabled: boolean;
+        initialWrapLongLines: boolean;
+    };
 }
 
-App.getInitialProps = async ({ ctx: { req } }: { ctx: NextPageContext}): Promise<AppInitialProps>  => {
+App.getInitialProps = async ({ ctx: { req } }: { ctx: NextPageContext }): Promise<AppInitialProps> => {
     return {
         props: {
+            // @ts-ignore
             initialIsDarkModeEnabled: req?.cookies[DARK_MODE_COOKIE_KEY] === "true",
-            initialWrapLongLines: req?.cookies[WRAP_LONG_LINES_COOKIE_KEY] === "true"
-        }
+            // @ts-ignore
+            initialWrapLongLines: req?.cookies[WRAP_LONG_LINES_COOKIE_KEY] === "true",
+        },
     };
 };
 
