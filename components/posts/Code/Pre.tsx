@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from "react";
+import React, { PropsWithChildren, useMemo } from "react";
 
 interface CodeDisplayContextType {
     defaultExpanded?: boolean;
@@ -12,7 +12,7 @@ export const CodeDisplayContext = React.createContext<CodeDisplayContextType>({
     useAccordion: false
 });
 
-export const Pre: FC<CodeDisplayContextType> = ({ children, defaultExpanded, rowCutoff, useAccordion }) => {
+export const Pre = ({ children, defaultExpanded, rowCutoff, useAccordion }: PropsWithChildren<CodeDisplayContextType>) => {
     const contextValue = useMemo(() => ({
         defaultExpanded,
         rowCutoff,

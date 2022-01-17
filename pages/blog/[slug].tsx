@@ -4,7 +4,7 @@ import glob from "glob";
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Link from "next/link";
 import { Button, Container, Typography } from "@mui/material";
-import React, { FC, useMemo} from "react";
+import React, { PropsWithChildren, useMemo} from "react";
 import { ArrowBack } from "@mui/icons-material";
 import styled from "styled-components";
 import { bundleMDX } from "mdx-bundler";
@@ -25,7 +25,7 @@ const StyledParagraph = styled(Typography)`
     }
 `;
 
-const Paragraph: FC = ({ children }) => {
+const Paragraph = ({ children }: PropsWithChildren<{}>) => {
     return <StyledParagraph variant="body1">{children}</StyledParagraph>;
 };
 
@@ -48,7 +48,7 @@ const StyledLi = styled.li`
     margin-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
-const ListItem: FC = ({ children }) => {
+const ListItem = ({ children }: PropsWithChildren<{}>) => {
     return (
         <StyledLi>
             <Typography variant="body1">{children}</Typography>
@@ -89,9 +89,7 @@ export const getStaticProps: GetStaticProps<PostProps, { slug: string }> = async
         file: path.resolve("posts", slug, "post.mdx"),
         cwd: path.resolve("posts", slug),
         xdmOptions: (options) => {
-            // this is the recommended way to add custom remark/rehype plugins:
-            // The syntax might look weird, but it protects you in case we add/remove
-            // plugins in the future.
+            // @ts-ignore
             options.remarkPlugins = [...(options.remarkPlugins ?? []), remarkMdxCodeMeta];
             return options;
         }

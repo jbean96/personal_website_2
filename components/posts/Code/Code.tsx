@@ -1,4 +1,4 @@
-import React, { FC, useContext } from "react";
+import React, { PropsWithChildren, useContext } from "react";
 import { Prism as ReactSyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark, materialLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import styled from "styled-components";
@@ -31,7 +31,7 @@ interface CodeProps {
  *     ...
  * ```
  */
-export const Code: FC<CodeProps> = ({ className, children }) => {
+export const Code = ({ className, children }: PropsWithChildren<CodeProps>) => {
     const { defaultExpanded, rowCutoff, useAccordion } = useContext(CodeDisplayContext);
     const { isDarkModeEnabled } = useContext(DarkModeContext);
     const { wrapLongLines } = useContext(CodeStyleContext);

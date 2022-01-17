@@ -1,59 +1,60 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import axios from "axios";
-import qs from "qs";
+import { MongoClient } from "mongodb";
 
-import { CurrentlyPlayingTrack, RefreshAccessRequest, RefreshAccessResponse } from "types/spotify";
+import { CurrentlyPlayingTrack } from "types/spotify";
+import { getCurrentlyPlayingTrack, refreshAccessToken } from "utils/spotify";
+import { ApiError } from "types/api";
 
-let access: (Omit<RefreshAccessResponse, "expires_in"> & { expires_at: number }) | undefined;
+const mongoClient = new MongoClient(encodeURI(process.env.MONGO_DB_URI!));
 
-const basicAuth =
-    Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString("base64");
-
-const getCurrentlyPlayingTrack = (): Promise<{ status: number; data?: CurrentlyPlayingTrack}> => {
-    return axios.get(
-        "https://api.spotify.com/v1/me/player/currently-playing",
-        {
-            headers: {
-                "Authorization": `Bearer ${access?.access_token}`,
-                "Content-Type": "application/json"
-            }
-        });
-};
-
-const getRefreshAccessTokenRequestBody = (request: RefreshAccessRequest): string => {
-    return qs.stringify(request);
-};
-
-const refreshAccessToken = (): Promise<RefreshAccessResponse> => {
-    return axios.post<string, { data: RefreshAccessResponse }>(
-        "https://accounts.spotify.com/api/token",
-        getRefreshAccessTokenRequestBody({
-            "grant_type": "refresh_token",
-            "refresh_token": process.env.SPOTIFY_REFRESH_TOKEN as string
-        }),
-        {
-            headers: {
-                "Authorization": `Basic ${basicAuth}`,
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-        }
-    ).then(response => response.data);
-};
+interface SpotifyAccessInfo {
+    refresh_token: string;
+    access_token?: string;
+    expires_at?: number;
+}
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<CurrentlyPlayingTrack | undefined>
+    res: NextApiResponse<CurrentlyPlayingTrack | ApiError | undefined>
 ) {
-    try {
-        if (access == null || Date.now() >= access.expires_at) {
-            const { expires_in, ...rest } = await refreshAccessToken();
-            access = { ...rest, expires_at: Date.now() + expires_in * 1000 };
-        }
-        const response = await getCurrentlyPlayingTrack();
-        // If no song is playing, response.data is an empty string and we should just return undefined instead
-        console.log(response.status);
-        res.status(response.status).json(response.data);
-    } catch (error) {
-        res.status(400).send(error);
-    }
+    return new Promise<void>(resolve => {
+        mongoClient.connect(async () => {
+            try {
+                const collection = mongoClient.db("personalWebsite").collection("data");
+                const response = await collection.findOne({ key: "spotify" });
+
+                let accessInfo = response as unknown as SpotifyAccessInfo;
+
+                if (
+                    accessInfo.access_token == null ||
+                accessInfo.expires_at == null ||
+                accessInfo.expires_at <= Date.now()
+                ) {
+                    const { expires_in, access_token } = await refreshAccessToken(accessInfo.refresh_token);
+
+                    await collection.findOneAndUpdate({ key: "spotify" }, {
+                        $set: {
+                            expires_at: Date.now() + expires_in * 1000,
+                            access_token: access_token
+                        }
+                    });
+
+                    accessInfo = await collection.findOne({ key: "spotify" }) as unknown as SpotifyAccessInfo;
+                }
+
+                if (accessInfo.access_token == null) {
+                    throw new Error("Missing access token");
+                }
+
+                const currentTrackResponse = await getCurrentlyPlayingTrack(accessInfo.access_token);
+
+                res.status(currentTrackResponse.status).json(currentTrackResponse.data);
+            } catch {
+                res.status(400).send({ error: "Error loading current track" });
+            } finally {
+                mongoClient.close();
+                resolve();
+            }
+        });
+    });
 }

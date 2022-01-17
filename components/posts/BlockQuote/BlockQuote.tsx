@@ -1,5 +1,5 @@
 import { alpha } from "@mui/material";
-import { FC } from "react";
+import { FC, PropsWithChildren } from "react";
 import styled from "styled-components";
 
 const BlockQuoteWrapper = styled.div`
@@ -18,6 +18,6 @@ const BlockQuoteWrapper = styled.div`
     }
 `;
 
-export const BlockQuote: FC = ({ children }) => {
+export const BlockQuote = ({ children }: PropsWithChildren<{}>) => {
     return <BlockQuoteWrapper>{children}</BlockQuoteWrapper>;
 };
